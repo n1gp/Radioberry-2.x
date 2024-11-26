@@ -64,12 +64,14 @@ For more information, please refer to <http://unlicense.org/>
 	#define FIRMWAREVERSION "L-J-09-16-2024"
 #endif
 
-void printIntroScreen() {
+static int NR = 6;
+
+void printIntroScreen(int rx, int tx) {
 	fprintf(stderr,"\n");
 	fprintf(stderr,	"====================================================================\n");
 	fprintf(stderr,	"====================================================================\n");
 	fprintf(stderr, "\t\t\tRadioberry V2.0\n\n\n");
-	fprintf(stderr,	"\tSupports 6 receivers and 1 transmitter.\n\n");
+	fprintf(stderr,	"\tSupports %d receivers and %d transmitter.\n\n", rx, tx);
 	fprintf(stderr, "\tBuild version: %s\n\n", FIRMWAREVERSION);
 	fprintf(stderr, "\tHave fun Johan PA3GSB\n\n");
 	fprintf(stderr, "\tReport requests or bugs to <pa3gsb@gmail.com>.\n");
@@ -83,15 +85,13 @@ void handle_sigint(int sig)
 	closerb = 1;
 }
 
-int load_radioberry_gateware() {
+int load_radioberry_gateware(const char *name) {
 	
 	int ret = 0;
 	
 	time_t gstartTime = clock();
 	
-	ret = load_gateware_image_into_fpga();
-
-	if (ret < 0) { return ret; };
+	if (ret = load_gateware_image_into_fpga(name) < 0) { return ret; };
 
 	time_t gstopTime = clock();
 	double gsecondsElapsed = (double)(gstopTime - gstartTime) / CLOCKS_PER_SEC;
@@ -337,7 +337,7 @@ void handlePacket(unsigned char* buffer){
 }
 
 void write_rb_stream(unsigned char* buffer) {
-	setAmplifierInfoBuffer(buffer);  
+	if (NR!=10) setAmplifierInfoBuffer(buffer);  
 	write_stream(buffer);
 }
 
@@ -422,13 +422,19 @@ void start_temperature_thread() {
 
 int main(int argc, char **argv)
 {	
-	printIntroScreen();
+	if(argc == 2 && strstr(argv[1], "10") != NULL) {
+		printIntroScreen(10,0);
+		NR=10;
+	} else {
+		printIntroScreen(6,1);
+		NR=6;
+	}
 
 #ifndef _WIN32	
 	isRPILinux();
 #endif
 
-	if (load_radioberry_gateware() < 0) {
+	if (load_radioberry_gateware(NR==10?argv[1]:"radioberry.rbf") < 0) {
 		fprintf(stderr,"Radioberry; loading radioberry gateware failed. \n");
 		return -1;
 	}
@@ -551,7 +557,8 @@ int main(int argc, char **argv)
 	
 	start_temperature_thread();
 	
-	start_rb_pa_thread();
+	// no TX on 10RX gateware
+	if (NR != 10) start_rb_pa_thread();
 	
 	signal(SIGINT, handle_sigint);
 	

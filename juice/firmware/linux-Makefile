@@ -3,7 +3,12 @@ LINK=gcc
 
 OPTIONS=-g -O3 
 
+STREAM=stream
 LIBS=-lrt -lm -lpthread -lftd2xx
+ifeq ($(shell test -e /usr/local/lib/libftdi1.so.2 && echo -n yes),yes)
+	LIBS+= -lftdi1
+	STREAM=stream_ftdi1
+endif
 
 COMPILE=$(CC) $(OPTIONS) $(INCLUDES)
 
@@ -12,14 +17,14 @@ PROGRAM=radioberry-juice
 SOURCES= \
 radioberry.c \
 gateware.c \
-stream.c \
+$(STREAM).c \
 register.c \
 pa.c
 
 HEADERS= \
 radioberry.h \
 gateware.h \
-stream.h \
+$(STREAM).h \
 register.h \
 sensors.h \
 pa.h
@@ -27,7 +32,7 @@ pa.h
 OBJS= \
 radioberry.o \
 gateware.o \
-stream.o \
+$(STREAM).o \
 register.o \
 pa.o
 

@@ -47,7 +47,6 @@
 
 #define TIMEOUT_MS      100
 #define SERVICE_PORT	1024
-#define NR 0x06
 #define HERMESLITE  0x06
 
 

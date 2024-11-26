@@ -39,7 +39,7 @@
 #define CLEAR_DATA0(s)   (s &= ~(1 << 1))
 #define CLEAR_NCONFIG(s) (s &= ~(1 << 2))
 
-int load_gateware_image_into_fpga(void);
+int load_gateware_image_into_fpga(const char*);
 
 unsigned long getFirmwareVersion(void);
 

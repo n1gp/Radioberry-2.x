@@ -95,7 +95,7 @@ int  fopen_s(FILE **f, const char *name, const char *mode) {
     return ret;
 }
 
-int upload_gateware() {
+int upload_gateware(const char *name) {
 
 	printf("FPGA gateware upload...\r\n");
 
@@ -113,13 +113,13 @@ int upload_gateware() {
 	int return_status = 0;
 
 	FILE* fp;
-	err = fopen_s(&fp, "radioberry.rbf", "rb");
+	err = fopen_s(&fp, name, "rb");
 	if (err != 0) {
-		printf("The file 'radioberry.rbf' was not opened\n");
+		printf("The file '%s' was not opened\n", name);
 		return -1;
 	}
 
-	stat("radioberry.rbf", &state);
+	stat(name, &state);
 	
 	printf("FPGA gateware size: %d\n", state.st_size);
 	
@@ -279,18 +279,18 @@ int deinit_gateware_ftdi() {
 
 unsigned long getFirmwareVersion() {
 	FT_STATUS ftStatus;
-	unsigned long dwDriverVer = 0;
+	unsigned int dwDriverVer = 0;
 
 	ftStatus = FT_GetDriverVersion(ftHandle,&dwDriverVer);
 
 	return dwDriverVer;
 }
 
-int  load_gateware_image_into_fpga() {
+int  load_gateware_image_into_fpga(const char *name) {
 	
 		if (init_gateware_ftdi() < 0) return -1 ;
 		init_gateware_upload();
-		upload_gateware();
+		upload_gateware(name);
 		activate_gateware();
 
 	return 0;
