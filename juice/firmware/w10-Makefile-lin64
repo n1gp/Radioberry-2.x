@@ -1,0 +1,19 @@
+# To build this 64 bit Windows version on Linux, install g++-mingw-w64-i686-win32
+
+current_dir = $(shell pwd)
+
+CXX = x86_64-w64-mingw32-g++ -Wwrite-strings -fpermissive
+CXXFLAGS = -O3 -D_WIN32_WINNT=0x0A00  -DWINVER=0x0A00
+LDSTATIC =  -lwsock32 -lws2_32 -L$(current_dir) -lIphlpapi -lftd2xx -lpthread
+LINK = $(CXX)
+
+.SUFFIXES: .o .c
+%.o: %.c %.h
+	$(CXX)  $(CXXFLAGS) -c $<
+
+radioberry: radioberry.o gateware.o stream.o register.o pa.o
+	$(LINK) --static radioberry.o gateware.o stream.o register.o pa.o $(LDSTATIC) -o radioberry-juice.exe
+
+clean:
+	rm *.o
+	rm radioberry-juice.exe
